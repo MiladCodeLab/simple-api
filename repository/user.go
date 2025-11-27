@@ -14,7 +14,7 @@ var (
 type UserRepository interface {
 	GetAll() ([]*entity.User, error)
 	Add(user entity.User) error
-	GetByID(id string) (entity.User, error)
+	GetByID(id string) (*entity.User, error)
 	DeleteByID(id string) error
 }
 
@@ -58,7 +58,7 @@ func (r *userRepository) Add(user entity.User) error {
 	return nil
 }
 
-func (r *userRepository) GetByID(id string) (entity.User, error) {
+func (r *userRepository) GetByID(id string) (*entity.User, error) {
 	lg := r.logger.With("method", "GetByID", "id", id)
 
 	r.mu.Lock()
@@ -67,11 +67,11 @@ func (r *userRepository) GetByID(id string) (entity.User, error) {
 	user, ok := r.data[id]
 	if !ok {
 		lg.Warn("user not found")
-		return entity.User{}, ErrNotFoundUser
+		return nil, ErrNotFoundUser
 	}
 
 	lg.Debug("user fetched")
-	return user, nil
+	return &user, nil
 }
 
 func (r *userRepository) DeleteByID(id string) error {
