@@ -1,6 +1,8 @@
 package application
 
 import (
+	"errors"
+	"github.com/MiladCodeLab/simple-api/repository"
 	"net/http"
 
 	"github.com/MiladCodeLab/simple-api/dto"
@@ -57,8 +59,13 @@ func (h *UserHandler) GetByID(c *gin.Context) {
 
 	user, err := h.service.GetByID(id)
 	if err != nil {
-		lg.Warn("user not found", "id", id, "error", err)
-		JSONError(c, http.StatusNotFound, "user not found")
+		if errors.Is(err, repository.ErrNotFoundUser) {
+			lg.Warn("user not found", "id", id, "error", err)
+			JSONError(c, http.StatusNotFound, "user not found")
+			return
+		}
+		lg.Error("failed fetching user", "id", id, "error", err)
+		JSONError(c, http.StatusInternalServerError, "failed to fetch user")
 		return
 	}
 
@@ -101,8 +108,13 @@ func (h *UserHandler) DeleteByID(c *gin.Context) {
 
 	err := h.service.DeleteByID(id)
 	if err != nil {
-		lg.Warn("delete failed", "id", id, "error", err)
-		JSONError(c, http.StatusNotFound, "user not found")
+		if errors.Is(err, repository.ErrNotFoundUser) {
+			lg.Warn("delete failed", "id", id, "error", err)
+			JSONError(c, http.StatusNotFound, "user not found")
+			return
+		}
+		lg.Error("failed to delete user", "error", err)
+		JSONError(c, http.StatusInternalServerError, "failed to delete user")
 		return
 	}
 
