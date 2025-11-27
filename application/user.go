@@ -57,6 +57,12 @@ func (h *UserHandler) GetByID(c *gin.Context) {
 		return
 	}
 
+	// UUID validation
+	if _, err := uuid.Parse(id); err != nil {
+		JSONError(c, http.StatusBadRequest, "invalid uuid format")
+		return
+	}
+
 	user, err := h.service.GetByID(id)
 	if err != nil {
 		if errors.Is(err, repository.ErrNotFoundUser) {
@@ -103,6 +109,12 @@ func (h *UserHandler) DeleteByID(c *gin.Context) {
 	id := c.Param("id")
 	if id == "" {
 		JSONError(c, http.StatusBadRequest, "id required")
+		return
+	}
+
+	// UUID validation
+	if _, err := uuid.Parse(id); err != nil {
+		JSONError(c, http.StatusBadRequest, "invalid uuid format")
 		return
 	}
 
